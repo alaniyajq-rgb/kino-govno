@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Киновечер</title>
+<meta name="description" content="Общий список фильмов и сериалов на двоих">
+<meta name="theme-color" content="#16131c" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f2f0f6" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<!-- Вход -->
+<main id="landing" class="landing" hidden>
+  <div class="landing-inner">
+    <div class="marquee" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    <h1 class="brand">Кино<em>вечер</em></h1>
+    <p class="lead">Общий список фильмов и сериалов для вас и друга. Ищете в базе TMDB, добавляете в очередь, после просмотра ставите оценки.</p>
+
+    <form id="createForm" class="panel">
+      <label for="nameInput">Как вас зовут</label>
+      <input id="nameInput" maxlength="30" autocomplete="nickname" placeholder="Например, Эмиль" required>
+      <button class="btn primary" type="submit">Создать комнату</button>
+    </form>
+
+    <form id="joinForm" class="panel">
+      <label for="codeInput">Есть код от друга</label>
+      <div class="row">
+        <input id="codeInput" class="code" maxlength="6" placeholder="K7M2QX" autocomplete="off" autocapitalize="characters" spellcheck="false">
+        <button class="btn" type="submit">Войти</button>
+      </div>
+    </form>
+    <p class="credit">Данные о фильмах и постеры: TMDB. Этот сайт использует TMDB API, но не одобрен и не сертифицирован TMDB.</p>
+  </div>
+</main>
+
+<!-- Представиться при входе по ссылке -->
+<main id="joinName" class="landing" hidden>
+  <div class="landing-inner">
+    <h1 class="brand small">Кино<em>вечер</em></h1>
+    <p class="lead">Вас позвали в комнату <b id="joinCodeLabel" class="mono"></b>. Как вас зовут?</p>
+    <form id="joinNameForm" class="panel">
+      <label for="joinNameInput">Имя</label>
+      <input id="joinNameInput" maxlength="30" autocomplete="nickname" required>
+      <button class="btn primary" type="submit">Войти в комнату</button>
+    </form>
+  </div>
+</main>
+
+<!-- Комната -->
+<div id="app" hidden>
+  <header class="top">
+    <div class="top-inner">
+      <a class="logo" href="/" id="homeLink" aria-label="Киновечер, на главную">Кино<em>вечер</em></a>
+      <div class="top-right">
+        <div class="members" id="members"></div>
+        <button class="code-chip" id="inviteBtn" title="Скопировать ссылку-приглашение">
+          <span class="mono" id="roomCode"></span><span class="chip-label">Пригласить</span>
+        </button>
+      </div>
+    </div>
+    <div class="top-inner search-row">
+      <form class="search" id="searchForm" role="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Найти фильм или сериал" autocomplete="off" aria-label="Найти фильм или сериал">
+        <button type="button" class="clear" id="clearSearch" aria-label="Очистить поиск" hidden>×</button>
+      </form>
+    </div>
+  </header>
+
+  <section class="results" id="resultsWrap" hidden aria-live="polite">
+    <div class="wrap">
+      <div class="results-head"><span id="resultsTitle">Результаты</span><button class="link" id="closeResults">Закрыть</button></div>
+      <div class="results-list" id="results"></div>
+    </div>
+  </section>
+
+  <main class="wrap room">
+    <div class="bar">
+      <div class="tabs" role="group" aria-label="Список">
+        <button id="tabQueue" aria-pressed="true">К просмотру <span class="num" id="cQueue">0</span></button>
+        <button id="tabWatched" aria-pressed="false">Посмотрели <span class="num" id="cWatched">0</span></button>
+      </div>
+      <div class="bar-right">
+        <div class="seg" role="group" aria-label="Тип">
+          <button data-k="all" aria-pressed="true">Всё</button>
+          <button data-k="movie" aria-pressed="false">Фильмы</button>
+          <button data-k="tv" aria-pressed="false">Сериалы</button>
+        </div>
+        <select id="sort" aria-label="Сортировка">
+          <option value="added">Сначала новые</option>
+          <option value="tmdb">По рейтингу TMDB</option>
+          <option value="ours">По нашей оценке</option>
+          <option value="year">По году</option>
+        </select>
+        <button class="btn gold" id="randomBtn">Что смотрим?</button>
+      </div>
+    </div>
+
+    <div class="grid" id="grid"></div>
+    <div class="empty" id="empty" hidden></div>
+  </main>
+</div>
+
+<!-- Карточка фильма -->
+<dialog id="sheet" class="sheet" aria-labelledby="sheetTitle">
+  <div class="sheet-body" id="sheetBody"></div>
+</dialog>
+
+<div class="toast" id="toast" role="status" hidden></div>
+<script src="/app.js" type="module"></script>
+</body>
+</html>
